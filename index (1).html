@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ViRus_Buster.exe – เกมพิมพ์ไล่ไวรัส</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--desk:#2b7a8c;--win:#e8e4d8;--ink:#1c1b2e;--blue:#1f3a93;--blue2:#5a7be0;--red:#d9381e;--ok:#1f9d55;--amber:#f2a516}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--desk) radial-gradient(rgba(255,255,255,.12) 1.5px,transparent 1.5px) 0 0/22px 22px;font-family:'Sarabun','Noto Sans Thai',sans-serif;color:var(--ink);display:flex;justify-content:center;align-items:center;min-height:100vh;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))}
+#win{width:min(100%,440px);background:var(--win);border:3px solid var(--ink);box-shadow:7px 7px 0 rgba(0,0,0,.35);border-radius:6px;overflow:hidden}
+#bar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,var(--blue),var(--blue2));color:#fff;padding:6px 10px;font-family:'Pixelify Sans',monospace;font-size:1.05rem;letter-spacing:.5px}
+.btns{display:flex;gap:6px}.btns i{width:14px;height:14px;background:var(--win);border:2px solid var(--ink);display:block}.btns i.x{background:var(--red)}
+#stage{position:relative;margin:10px 10px 0;border:3px solid var(--ink);background:#dff0ff;line-height:0}
+canvas{width:100%;height:auto;display:block}
+#ui{position:absolute;inset:0;background:rgba(28,27,46,.55);display:flex;align-items:center;justify-content:center;padding:10px;line-height:1.5}
+#ui.hide{display:none}
+.dlg{width:100%;background:var(--win);border:3px solid var(--ink);box-shadow:4px 4px 0 rgba(0,0,0,.4)}
+.dlg .t{background:var(--ink);color:#fff;font-family:'Pixelify Sans',monospace;padding:4px 10px;font-size:.95rem}
+.dlg .b{padding:12px 16px 16px}
+.dlg h1{font-family:'Pixelify Sans','Sarabun',sans-serif;font-size:1.5rem;margin:0 0 6px;color:var(--red)}
+.dlg p{margin:0 0 8px;font-size:.95rem}
+.dlg ol{margin:0 0 10px;padding-left:1.3rem;font-size:.93rem}
+.dlg li{margin-bottom:3px}
+kbd{background:#fff;border:2px solid var(--ink);border-bottom-width:4px;border-radius:4px;padding:0 5px;font-family:'Pixelify Sans',monospace;font-size:.85rem}
+#best{font-weight:700;color:var(--blue);min-height:1.4em}
+button{font:700 1.1rem 'Sarabun',sans-serif;background:var(--amber);color:var(--ink);border:3px solid var(--ink);border-radius:4px;padding:6px 26px;cursor:pointer;box-shadow:inset -3px -3px 0 rgba(0,0,0,.22),inset 3px 3px 0 rgba(255,255,255,.5)}
+button:active{transform:translate(1px,1px)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+#prompt{display:flex;align-items:center;gap:8px;margin:10px;background:var(--ink);padding:6px 10px;border-radius:4px}
+#prompt label{font-family:'Pixelify Sans',monospace;color:var(--amber);font-size:1.1rem}
+#in{flex:1;min-width:0;background:transparent;border:0;color:#fff;font:700 1.25rem 'Pixelify Sans',monospace;caret-color:var(--amber)}
+#in.bad{color:#ff8a7a}
+#in:focus-visible{outline:0}
+#prompt:focus-within{box-shadow:0 0 0 3px var(--blue2)}
+#status{display:flex;justify-content:space-between;gap:8px;padding:5px 12px 8px;font-size:.92rem;border-top:2px solid var(--ink);background:#d6d1c2}
+#hp{font-family:'Pixelify Sans',monospace;letter-spacing:2px;color:var(--ok)}
+#hp.low{color:var(--red)}
+@media (prefers-reduced-motion:reduce){button:active{transform:none}}
+</style>
+</head>
+<body>
+<main id="win">
+  <div id="bar"><span>ViRus_Buster.exe</span><span class="btns" aria-hidden="true"><i></i><i></i><i class="x"></i></span></div>
+  <div id="stage">
+    <canvas id="c" width="400" height="480" aria-label="พื้นที่เล่นเกม"></canvas>
+    <div id="ui">
+      <div class="dlg" role="dialog" aria-labelledby="ttl">
+        <div class="t">คำเตือนจากระบบ</div>
+        <div class="b">
+          <h1 id="ttl">ไวรัสบุกเครื่อง!</h1>
+          <p id="msg">ไวรัสถูกปลอมเป็นคำศัพท์คอมพิวเตอร์ ลบมันก่อนที่จะทะลุไฟร์วอลล์</p>
+          <ol id="how">
+            <li>คำศัพท์จะร่วงลงมาจากด้านบน</li>
+            <li>พิมพ์คำนั้นในช่อง <kbd>C:\&gt;</kbd> ให้ตรงทุกตัวอักษร ไม่ต้องกด Enter</li>
+            <li>พิมพ์ถูก คำจะถูกลบและได้คะแนน คำยาวได้คะแนนมาก</li>
+            <li>ถ้าคำใดตกถึงแถบไฟร์วอลล์ด้านล่าง เครื่องจะเสียพลัง 1 ช่อง (มี 5 ช่อง)</li>
+            <li>ลบครบทุก 8 คำ เลเวลจะเพิ่ม คำจะยาวและเร็วขึ้น</li>
+          </ol>
+          <p id="best"></p>
+          <button id="go">เริ่มสแกนไวรัส</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="prompt"><label for="in">C:\&gt;</label><input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="พิมพ์คำที่ร่วงลงมา"></div>
+  <div id="status"><span>คะแนน <b id="sc">0</b></span><span>เลเวล <b id="lv">1</b></span><span id="hp" aria-label="พลังเครื่อง"></span></div>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const cv=$('c'),ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+const inp=$('in'),ui=$('ui'),go=$('go');
+const WORDS=[['cpu','หน่วยประมวลผล'],['ram','หน่วยความจำ'],['gpu','การ์ดจอ'],['ssd','ฮาร์ดดิสก์เร็ว'],['wifi','ไร้สาย'],['bug','ข้อผิดพลาด'],['code','โค้ด'],['byte','ไบต์'],['mouse','เมาส์'],['cache','แคช'],['linux','ระบบปฏิบัติการ'],['cloud','คลาวด์'],['pixel','จุดภาพ'],['python','ภาษาโปรแกรม'],['server','เซิร์ฟเวอร์'],['kernel','แกนระบบ'],['router','เราเตอร์'],['github','คลังเก็บโค้ด'],['binary','เลขฐานสอง'],['browser','เว็บเบราว์เซอร์'],['network','เครือข่าย'],['monitor','จอภาพ'],['keyboard','คีย์บอร์ด'],['password','รหัสผ่าน'],['firewall','กำแพงไฟ'],['database','ฐานข้อมูล'],['compiler','ตัวแปลโค้ด'],['hardware','ส่วนเครื่อง'],['software','ซอฟต์แวร์'],['algorithm','อัลกอริทึม']];
+let best=0;try{best=+localStorage.getItem('vb-best')||0}catch(e){}
+const showBest=()=>{$('best').textContent=best?'คะแนนสูงสุด: '+best:''};showBest();
+
+let words,parts,score,kills,hp,spawn,running=false,last=0,flash=0,typed='';
+const level=()=>1+Math.floor(kills/8);
+const renderHud=()=>{$('sc').textContent=score;$('lv').textContent=level();const h=$('hp');h.textContent='■'.repeat(hp)+'□'.repeat(5-hp);h.className=hp<=2?'low':''};
+
+function start(){
+  words=[];parts=[];score=0;kills=0;hp=5;spawn=.4;flash=0;typed='';
+  inp.value='';inp.className='';inp.disabled=false;renderHud();
+  ui.classList.add('hide');running=true;inp.focus();last=performance.now();requestAnimationFrame(loop);
+}
+function end(){
+  running=false;inp.disabled=true;
+  if(score>best){best=score;try{localStorage.setItem('vb-best',best)}catch(e){}}
+  $('ttl').textContent='ระบบล่ม!';
+  $('msg').innerHTML='คุณลบไวรัสได้ <b>'+kills+'</b> ตัว ได้ <b>'+score+'</b> คะแนน (เลเวล '+level()+')';
+  $('how').style.display='none';showBest();go.textContent='สแกนอีกครั้ง';ui.classList.remove('hide');go.focus();
+}
+go.addEventListener('click',start);
+addEventListener('keydown',e=>{if(!running&&e.key==='Enter'&&document.activeElement!==go)start()});
+$('stage').addEventListener('pointerdown',()=>{if(running)inp.focus()});
+
+function addWord(){
+  const maxLen=Math.min(4+level(),9),act=words.map(w=>w.t);
+  const pool=WORDS.filter(w=>w[0].length<=maxLen&&!act.includes(w[0]));
+  if(!pool.length)return;
+  const [t,h]=pool[Math.floor(Math.random()*pool.length)];
+  ctx.font="700 20px 'Pixelify Sans',monospace";
+  const tw=ctx.measureText(t).width,pw=tw+46;
+  words.push({t,h,tw,pw,x:pw/2+6+Math.random()*(W-pw-12),y:-20,v:26+level()*5+Math.random()*10});
+}
+function burst(x,y){for(let i=0;i<14;i++){const a=Math.random()*6.28,s=60+Math.random()*120;parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:.55,c:Math.random()<.5?'#d9381e':'#f2a516'})}}
+
+inp.addEventListener('input',()=>{
+  if(!running)return;
+  const v=inp.value.toLowerCase().trim();typed=v;
+  const hit=words.filter(w=>w.t===v).sort((a,b)=>b.y-a.y)[0];
+  if(hit){
+    words.splice(words.indexOf(hit),1);burst(hit.x,hit.y);
+    score+=hit.t.length*10;kills++;inp.value='';typed='';inp.className='';renderHud();return;
+  }
+  inp.className=(v&&!words.some(w=>w.t.startsWith(v)))?'bad':'';
+});
+
+function update(dt){
+  spawn-=dt;
+  if(spawn<=0){addWord();spawn=Math.max(.9,2.6-level()*.2)}
+  for(const w of words){w.y+=w.v*dt}
+  const gone=words.filter(w=>w.y>H-34);
+  if(gone.length){hp-=gone.length;flash=.35;words=words.filter(w=>w.y<=H-34);renderHud();if(hp<=0){hp=0;renderHud();end()}}
+  for(const p of parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt}
+  parts=parts.filter(p=>p.l>0);
+  if(flash>0)flash-=dt;
+}
+
+function draw(){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#bfe0fb');g.addColorStop(1,'#eaf5ff');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(31,58,147,.12)';ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=25){ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);ctx.stroke()}
+  for(let y=0;y<=H;y+=25){ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke()}
+  // firewall band
+  const fy=H-30;
+  ctx.fillStyle='#1c1b2e';ctx.fillRect(0,fy,W,30);
+  ctx.fillStyle='#f2a516';
+  for(let x=-20;x<W;x+=28){ctx.beginPath();ctx.moveTo(x,fy);ctx.lineTo(x+14,fy);ctx.lineTo(x+4,fy+7);ctx.lineTo(x-10,fy+7);ctx.fill()}
+  ctx.fillStyle='#fff';ctx.font="700 14px 'Pixelify Sans',monospace";ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('FIREWALL',W/2,fy+19);
+  // words
+  for(const w of words){
+    const x0=w.x-w.pw/2,y0=w.y-16;
+    ctx.fillStyle='rgba(28,27,46,.28)';ctx.fillRect(x0+3,y0+3,w.pw,32);
+    ctx.fillStyle='#fff';ctx.fillRect(x0,y0,w.pw,32);
+    ctx.strokeStyle='#d9381e';ctx.lineWidth=3;ctx.strokeRect(x0+1.5,y0+1.5,w.pw-3,29);
+    // bug icon
+    ctx.fillStyle='#d9381e';ctx.fillRect(x0+9,y0+11,10,10);ctx.fillRect(x0+6,y0+14,3,2);ctx.fillRect(x0+19,y0+14,3,2);ctx.fillRect(x0+11,y0+8,2,3);ctx.fillRect(x0+15,y0+8,2,3);
+    ctx.textAlign='left';ctx.textBaseline='middle';ctx.font="700 20px 'Pixelify Sans',monospace";
+    const tx=x0+30,ty=y0+17;
+    ctx.fillStyle='#1c1b2e';ctx.fillText(w.t,tx,ty);
+    if(typed&&w.t.startsWith(typed)){ctx.fillStyle='#1f3a93';ctx.fillText(typed,tx,ty);
+      ctx.fillStyle='rgba(31,58,147,.16)';ctx.fillRect(x0+4,y0+4,w.pw-8,24)}
+    ctx.textAlign='center';ctx.font="13px 'Sarabun',sans-serif";ctx.fillStyle='#1f3a93';
+    ctx.fillText(w.h,w.x,y0+46);
+  }
+  for(const p of parts){ctx.globalAlpha=Math.max(p.l*1.8,0);ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,6,6)}
+  ctx.globalAlpha=1;
+  if(flash>0){ctx.fillStyle='rgba(217,56,30,'+flash+')';ctx.fillRect(0,0,W,H)}
+}
+
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-last)/1000,.05);last=now;
+  update(dt);draw();
+  if(running)requestAnimationFrame(loop);
+}
+words=[];parts=[];hp=5;score=0;kills=0;renderHud();
+(document.fonts&&document.fonts.ready||Promise.resolve()).then(draw);draw();
+})();
+</script>
+</body>
+</html>
